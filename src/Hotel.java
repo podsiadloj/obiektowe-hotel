@@ -5,7 +5,6 @@ public interface Hotel {
     void loadRooms(Reader reader);
     void saveRooms(Writer writer);
 
-
     void addRoom(String name, int nOfBeds);
     void deleteRoom(String name);
 
