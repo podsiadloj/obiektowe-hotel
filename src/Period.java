@@ -1,18 +1,20 @@
+import java.util.Date;
+
 //Okres rezerwacji od-do
 public class Period {
-    private Integer start;
-    private Integer end;
+    private Date start;
+    private Date end;
 
-    public Period(Integer start, Integer end) {
+    public Period(Date start, Date end) {
         this.start = start;
         this.end = end;
     }
 
-    public Integer getStart() {
+    public Date getStart() {
         return start;
     }
 
-    public Integer getEnd() {
+    public Date getEnd() {
         return end;
     }
 }

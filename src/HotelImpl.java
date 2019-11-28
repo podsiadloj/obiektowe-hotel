@@ -3,18 +3,24 @@ import java.io.Writer;
 import java.util.List;
 
 public class HotelImpl implements Hotel {
+
     @Override
-    public void loadRooms(Reader reader) {
+    public void addClient(String name) {
 
     }
 
     @Override
-    public void saveRooms(Writer writer) {
+    public void deleteClient(String name) {
 
     }
 
     @Override
-    public void addRoom(String name, int nOfBeds) {
+    public List<Client> clients() {
+        return null;
+    }
+
+    @Override
+    public void addRoom(String name, int nOfBeds, Comfort comfort) {
 
     }
 
@@ -29,8 +35,23 @@ public class HotelImpl implements Hotel {
     }
 
     @Override
-    public boolean makeReservation(Client client, ReservationInfo request) {
-        return false;
+    public int makeReservation(Client client, ReservationInfo request) {
+        return 0;
+    }
+
+    @Override
+    public List<ReservationInfo> listReservations() {
+        return null;
+    }
+
+    @Override
+    public ReservationInfo getReservation(int id) {
+        return null;
+    }
+
+    @Override
+    public void deleteReservation(int id) {
+
     }
 
     public HotelImpl(){

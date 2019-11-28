@@ -3,7 +3,7 @@ public class RoomInfo {
     private String name;
     private Integer number;
 
-    public RoomInfo(String name, Integer number){
+    public RoomInfo(String name, Integer number, Comfort comfort){
         this.name = name;
         this.number = number;
     }

@@ -25,19 +25,20 @@ public class Main {
                     // usuwanie klienta
                     // parametr: nazwa (String)
                     break;
-                case "listclients":
-                    // lista klientów z ich danymi (bez filtrowania)
+                case "showclient":
+                    // parametr: nazwa (String)
                     // dane klienta:
-                    // nazwa (string)
-                    // liczba dotychczasowych rezerwacji (int)
-                    // czy stały klient (true/false)
+                    // dotychczasowe rezerwacje
+                    // czy stały klient (true/false) - stały klient ustawiany automatycznie po 5 rezerwacjach
+                case "listclients":
+                    // lista klientów (bez filtrowania)
                     break;
                 case "addroom":
                     // dodaj pokój
                     // parametry:
                     // nazwa
                     // liczba miejsc
-                    // komfort (1, 2, 3)
+                    // komfort (HIGH, MEDIUM, LOW)
                     break;
                 case "deleteroom":
                     // usuń pokój
