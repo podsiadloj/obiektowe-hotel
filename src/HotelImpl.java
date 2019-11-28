@@ -32,4 +32,12 @@ public class HotelImpl implements Hotel {
     public boolean makeReservation(Client client, ReservationInfo request) {
         return false;
     }
+
+    public HotelImpl(){
+        // musi załadować dane z CSV:
+        // - pokoje
+        // - klienci
+        // - rezerwacje
+        // te dane muszą być zapisywane w każdej funkcji modyfikującej stan
+    }
 }
