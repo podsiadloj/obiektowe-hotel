@@ -54,7 +54,7 @@ public class HotelImpl implements Hotel {
     public void deleteRoom(String name) {
         if(!rooms.containsKey(name)){
             rooms.remove(name);
-            saveClients();
+            saveRooms();
         }
     }
 
