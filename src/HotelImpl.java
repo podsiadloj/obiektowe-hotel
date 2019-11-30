@@ -136,7 +136,7 @@ public class HotelImpl implements Hotel {
 
     }
 
-    public HotelImpl(){
+    private HotelImpl(){
         clientsMap = new HashMap<>(); //TODO: load from csv
         rooms = new HashMap<>(); //TODO: load from csv
         reservations = new HashMap<>(); //TODO: load from csv
@@ -145,5 +145,11 @@ public class HotelImpl implements Hotel {
         // - klienci
         // - rezerwacje
         // te dane muszą być zapisywane w każdej funkcji modyfikującej stan
+    }
+
+    public static Hotel instance = new HotelImpl();
+
+    public static Hotel getInstance(){
+        return instance;
     }
 }
