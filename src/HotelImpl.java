@@ -1,22 +1,45 @@
-import java.io.Reader;
-import java.io.Writer;
-import java.util.List;
+import java.util.*;
 
 public class HotelImpl implements Hotel {
 
+    private Map<String, Client> clientsMap;
+    private Map<String, RoomInfo> rooms;
+    private Map<Integer, ReservationInfo> reservations;
+
+    private void saveClients(){
+        //TODO: save clients to csv
+    };
+    private void saveRooms(){
+        //TODO: save rooms to csv
+    };
+    private void saveReservations(){
+        //TODO: save reservations to csv
+    };
+
     @Override
     public void addClient(String name) {
-
+        if(!clientsMap.containsKey(name)){
+            clientsMap.put(name, new Client());
+            saveClients();
+        }
     }
 
     @Override
     public void deleteClient(String name) {
-
+        if(!clientsMap.containsKey(name)){
+            clientsMap.remove(name);
+            saveClients();
+        }
     }
 
     @Override
-    public List<Client> clients() {
-        return null;
+    public List<String> clients() {
+        return new ArrayList<>(this.clientsMap.keySet());
+    }
+
+    @Override
+    public Client getClient(String name) {
+        return clientsMap.get(name);
     }
 
     @Override
@@ -55,6 +78,9 @@ public class HotelImpl implements Hotel {
     }
 
     public HotelImpl(){
+        clientsMap = new HashMap<>(); //TODO: load from csv
+        rooms = new HashMap<>(); //TODO: load from csv
+        reservations = new HashMap<>(); //TODO: load from csv
         // musi załadować dane z CSV:
         // - pokoje
         // - klienci

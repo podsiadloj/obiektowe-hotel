@@ -5,7 +5,8 @@ public interface Hotel {
 
     void addClient(String name);
     void deleteClient(String name);
-    List<Client> clients();
+    List<String> clients();
+    Client getClient(String name);
 
     void addRoom(String name, int nOfBeds, Comfort comfort);
     void deleteRoom(String name);
