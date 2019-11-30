@@ -82,7 +82,11 @@ public class HotelImpl implements Hotel {
         for (ReservationInfo reservation : reservations.values()) {
             Period overlap = calcOverlap(period, reservation.getPeriod());
             if(overlap != null && overlap.getDays() > 0){
-                return true;
+                for (RoomInfo reservedRoom: reservation.getRoomsInfo()){
+                    if(reservedRoom.name.equals(roomName)) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
