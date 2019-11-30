@@ -10,6 +10,10 @@ public class Period {
         this.end = end;
     }
 
+    public int getDays(){
+        return (int) Math.ceil( (double) (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
     public Date getStart() {
         return start;
     }

@@ -44,17 +44,72 @@ public class HotelImpl implements Hotel {
 
     @Override
     public void addRoom(String name, int nOfBeds, Comfort comfort) {
-
+        if(!rooms.containsKey(name)){
+            rooms.put(name, new RoomInfo(name, nOfBeds, comfort));
+            saveRooms();
+        }
     }
 
     @Override
     public void deleteRoom(String name) {
-
+        if(!rooms.containsKey(name)){
+            rooms.remove(name);
+            saveClients();
+        }
     }
 
     @Override
-    public List<ReservationInfo> findFreeRooms(Period period, List<Integer> rooms) {
-        return null;
+    public Map<String, RoomInfo> findFreeRooms(Period period, List<Integer> rooms) {
+        List<String> results = new ArrayList<>();
+        for (String roomName : this.rooms.keySet()) {
+            RoomInfo room = this.rooms.get(roomName);
+            for (int size : rooms){
+                if(room.number == size){
+                    if(!results.contains(roomName) && !isRoomTaken(period, roomName)){
+                        results.add(roomName);
+                    }
+                }
+            }
+        }
+        Map<String, RoomInfo> resultMap = new HashMap<>();
+        for (String name : results) {
+            resultMap.put(name, this.rooms.get(name));
+        }
+        return resultMap;
+    }
+
+    private boolean isRoomTaken(Period period, String roomName){
+        for (ReservationInfo reservation : reservations.values()) {
+            Period overlap = calcOverlap(period, reservation.getPeriod());
+            if(overlap != null && overlap.getDays() > 0){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Period calcOverlap(Period p1, Period p2){
+        if(p1.getStart().getTime() < p2.getStart().getTime()){
+            if(p1.getEnd().getTime() <= p2.getStart().getTime()){
+                return null;
+            } else {
+                if(p1.getEnd().getTime() < p2.getEnd().getTime()){
+                    return new Period( p2.getStart(), p1.getEnd() );
+                } else {
+                    return p2;
+                }
+            }
+        } else {
+            if(p1.getStart().getTime() > p2.getEnd().getTime()){
+                return null;
+            } else {
+                if(p1.getEnd().getTime() > p2.getEnd().getTime()){
+                    return new Period( p1.getStart(), p2.getEnd() );
+                } else {
+                    return p1;
+                }
+            }
+        }
     }
 
     @Override

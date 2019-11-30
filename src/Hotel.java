@@ -13,7 +13,7 @@ public interface Hotel {
 
     // rooms jest listą liczb określających ile osób chcemy zakwaterować w pokoju
     // np.: { 1, 2} oznacza, że potrzebujemy pokoju dla jednej osoby i drugiego pokoju dla dwu osób.
-    List<ReservationInfo> findFreeRooms(Period period, List<Integer> rooms);
+    Map<String, RoomInfo> findFreeRooms(Period period, List<Integer> rooms);
 
     // zwraca cenę w groszach
     int makeReservation(Client client,  ReservationInfo request);
