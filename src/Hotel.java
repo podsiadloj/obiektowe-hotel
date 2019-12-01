@@ -1,3 +1,5 @@
+import javax.management.openmbean.InvalidKeyException;
+import javax.management.openmbean.KeyAlreadyExistsException;
 import java.io.*;
 import java.util.*;
 
@@ -8,8 +10,9 @@ public interface Hotel {
     List<String> clients();
     Client getClient(String name);
 
-    void addRoom(String name, int nOfBeds, Comfort comfort);
-    void deleteRoom(String name);
+    void addRoom(String name, int nOfBeds, Comfort comfort) throws KeyAlreadyExistsException;
+    void deleteRoom(String name) throws InvalidKeyException;
+    RoomInfo getRoom(String name) throws InvalidKeyException;
 
     // rooms jest listą liczb określających ile osób chcemy zakwaterować w pokoju
     // np.: { 1, 2} oznacza, że potrzebujemy pokoju dla jednej osoby i drugiego pokoju dla dwu osób.

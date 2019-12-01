@@ -1,3 +1,5 @@
+import javax.management.openmbean.InvalidKeyException;
+import javax.management.openmbean.KeyAlreadyExistsException;
 import java.util.*;
 
 public class HotelImpl implements Hotel {
@@ -42,19 +44,25 @@ public class HotelImpl implements Hotel {
     }
 
     @Override
-    public void addRoom(String name, int nOfBeds, Comfort comfort) {
+    public void addRoom(String name, int nOfBeds, Comfort comfort) throws KeyAlreadyExistsException {
         if(!rooms.containsKey(name)){
             rooms.put(name, new RoomInfo(name, nOfBeds, comfort));
             saveRooms();
-        }
+        } else throw new KeyAlreadyExistsException();
+    }
+
+    public RoomInfo getRoom(String name) throws InvalidKeyException {
+        if(rooms.containsKey(name)){
+            return rooms.get(name);
+        } else throw new InvalidKeyException();
     }
 
     @Override
-    public void deleteRoom(String name) {
+    public void deleteRoom(String name) throws InvalidKeyException {
         if(!rooms.containsKey(name)){
             rooms.remove(name);
             saveRooms();
-        }
+        } else throw new InvalidKeyException();
     }
 
     @Override
@@ -131,7 +139,7 @@ public class HotelImpl implements Hotel {
         }
         saveReservations();
         saveClients();
-        return 0;
+        return request.getPrice();
     }
 
     private int newReservationId(){
@@ -169,7 +177,11 @@ public class HotelImpl implements Hotel {
     public void deleteReservation(int id) {
         if(reservations.containsKey(id)){
             reservations.remove(id);
+            for (Client client: clientsMap.values()) {
+                client.reservationIds.removeIf(i -> i == id);
+            }
             saveReservations();
+            saveClients();
         }
     }
 
