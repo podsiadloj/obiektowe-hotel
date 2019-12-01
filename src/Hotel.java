@@ -16,9 +16,11 @@ public interface Hotel {
     Map<String, RoomInfo> findFreeRooms(Period period, List<Integer> rooms);
 
     // zwraca cenę w groszach
-    int makeReservation(Client client,  ReservationInfo request);
-    List<ReservationInfo> listReservations();
+    int makeReservation(Client client,  ReservationInfo request) throws InvalidRequestException;
+    List<Map.Entry<Integer, ReservationInfo>> listReservations();
     ReservationInfo getReservation(int id);
     void deleteReservation(int id);
+
+    class InvalidRequestException extends Exception {}
 
 }

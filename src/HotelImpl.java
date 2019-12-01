@@ -1,7 +1,6 @@
 import java.util.*;
 
 public class HotelImpl implements Hotel {
-
     private Map<String, Client> clientsMap;
     private Map<String, RoomInfo> rooms;
     private Map<Integer, ReservationInfo> reservations;
@@ -117,23 +116,61 @@ public class HotelImpl implements Hotel {
     }
 
     @Override
-    public int makeReservation(Client client, ReservationInfo request) {
+    public int makeReservation(Client client, ReservationInfo request) throws InvalidRequestException {
+        for (RoomInfo room : request.getRoomsInfo()) {
+            if(isRoomTaken(request.getPeriod(), room.name)){
+                throw new InvalidRequestException();
+            }
+        }
+        request.setPrice(calcReservationCost(request, client));
+        int id = newReservationId();
+        reservations.put(id, request);
+        client.reservationIds.add(id);
+        if(client.reservationIds.size() >= 5){
+            client.discount = true;
+        }
+        saveReservations();
+        saveClients();
         return 0;
     }
 
+    private int newReservationId(){
+        int i = 0;
+        while(true){
+            if(!reservations.containsKey(i)){
+                return i;
+            } else {
+                i++;
+            }
+        }
+    }
+
+    private int calcReservationCost(ReservationInfo reservation, Client client) {
+        int base = reservation.getRoomsInfo().stream().mapToInt(RoomInfo::getDailyCost).sum();
+        int forPeriod = base * reservation.getPeriod().getDays();
+        if(client.discount){
+            return (int) Math.ceil(forPeriod * 0.8);
+        } else {
+            return forPeriod;
+        }
+    }
+
     @Override
-    public List<ReservationInfo> listReservations() {
-        return null;
+    public List<Map.Entry<Integer, ReservationInfo>> listReservations() {
+        return new ArrayList<>(reservations.entrySet());
     }
 
     @Override
     public ReservationInfo getReservation(int id) {
-        return null;
+        return reservations.get(id);
     }
 
     @Override
     public void deleteReservation(int id) {
-
+        if(reservations.containsKey(id)){
+            reservations.remove(id);
+            saveReservations();
+        }
     }
 
     private HotelImpl(){
