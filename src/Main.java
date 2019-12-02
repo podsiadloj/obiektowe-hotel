@@ -85,7 +85,7 @@ public class Main {
                     splitOnSpaces.addAll(Arrays.asList(quoted[i].split("\\s+")));
                 }
             }
-            return splitOnSpaces.stream().filter(s -> (s.equals("") || s.matches("^\\s+$"))).collect(Collectors.toList());
+            return splitOnSpaces.stream().filter(s -> !(s.equals("") || s.matches("^\\s+$"))).collect(Collectors.toList());
         } else throw new IllegalArgumentException();
     }
 
