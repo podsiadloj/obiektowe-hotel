@@ -19,9 +19,10 @@ public class Main {
         boolean end = false;
         while(!end){ //pętla REPL
             System.out.println("Enter command ('help' for help):");
-            String input = scanner.next();
-            String command = input.split("\\s+")[0];
             try {
+                String rawInput = scanner.next();
+                List<String> input = parseRawInput(rawInput);
+                String command = input.get(0);
                 switch (command) {
                     case "help":
                         printHelp();
@@ -57,6 +58,7 @@ public class Main {
                         showreservation(input);
                         break;
                     case "deletereservation":
+                        deletereservation(input);
                         // parametr: id (Integer)
                         break;
                     // mniejszy priorytet - dopisać jak będzie czas: ustawianie okresów, w których cena jest wyższa/niższa
@@ -70,6 +72,21 @@ public class Main {
                 syntaxError();
             }
         }
+    }
+
+    private static List<String> parseRawInput(String rawInput) {
+        String[] quoted = rawInput.split("\"", -1);
+        if(quoted.length%2 == 1){
+            List<String> splitOnSpaces = new ArrayList<>();
+            for (int i = 0; i < quoted.length; i++) {
+                if(i%2 == 1){
+                    splitOnSpaces.add(quoted[i]);
+                } else {
+                    splitOnSpaces.addAll(Arrays.asList(quoted[i].split("\\s+")));
+                }
+            }
+            return splitOnSpaces.stream().filter(s -> (s.equals("") || s.matches("^\\s+$"))).collect(Collectors.toList());
+        } else throw new IllegalArgumentException();
     }
 
     private static void syntaxError() {
@@ -92,14 +109,14 @@ public class Main {
         System.out.println("deletereservation [id: integer] - delete reservation");
     }
 
-    private static void showreservation(String input) {
+    private static void showreservation(List<String> input) {
         // informacje o rezerwacji
         // parametr id (Integer)
         // wypisywane:
         // okres
         // klient
         // lista pokojów
-        int id = Integer.parseInt(input.split("\\s+")[1]);
+        int id = Integer.parseInt(input.get(1));
         ReservationInfo reservation = HotelImpl.getInstance().getReservation(id);
         if (reservation == null) {
             System.out.println("No such reservation");
@@ -108,8 +125,8 @@ public class Main {
         }
     }
 
-    private static void deletereservation(String input) {
-        int id = Integer.parseInt(input.split("\\s+")[1]);
+    private static void deletereservation(List<String> input) {
+        int id = Integer.parseInt(input.get(1));
         ReservationInfo reservation = HotelImpl.getInstance().getReservation(id);
         if (reservation == null) {
             System.out.println("No such reservation");
@@ -135,15 +152,16 @@ public class Main {
     // pokoje (lista Stringów nazw pokojów)
     //
     // wypisuje cenę rezerwacji
-    private static void addreservation(String input) throws ParseException {
-        String[] params = input.split("\\s+");
-        if(params.length > 4) {
+    private static void addreservation(List<String> input) throws ParseException {
+        if(input.size() > 4) {
             try {
                 Hotel hotel = HotelImpl.getInstance();
-                Client client = hotel.getClient(params[3]);
+                Client client = hotel.getClient(input.get(3));
                 if(client != null) {
-                    Period period = new Period(parseDate(params[1]), parseDate(params[2]));
-                    List<RoomInfo> rooms = Arrays.stream(Arrays.copyOfRange(params, 4, params.length))
+                    Period period = new Period(parseDate(input.get(1)), parseDate(input.get(2)));
+                    List<RoomInfo> rooms = input
+                            .subList(4, input.size())
+                            .stream()
                             .map(hotel::getRoom)
                             .collect(Collectors.toList());
                     ReservationInfo reservation = new ReservationInfoImpl(period, rooms);
@@ -163,11 +181,10 @@ public class Main {
     // okres od (String parsowalny do daty)
     // okres do (String parsowalny do daty)
     // pokoje (lista Integerów)
-    private static void freerooms(String input) throws ParseException {
-        String[] params = input.split("\\s+");
-        if(params.length > 3) {
-            Period period = new Period(parseDate(params[1]), parseDate(params[2]));
-            List<Integer> roomSizes = Arrays.stream(Arrays.copyOfRange(params, 3, params.length)).map(Integer::parseInt).collect(Collectors.toList());
+    private static void freerooms(List<String> input) throws ParseException {
+        if(input.size() > 3) {
+            Period period = new Period(parseDate(input.get(1)), parseDate(input.get(2)));
+            List<Integer> roomSizes = input.subList(3, input.size()).stream().map(Integer::parseInt).collect(Collectors.toList());
             Map<String, RoomInfo> rooms = HotelImpl.getInstance().findFreeRooms(period, roomSizes);
             if(rooms.size() > 0){
                 for (RoomInfo room: rooms.values()) {
@@ -184,13 +201,12 @@ public class Main {
     // nazwa
     // liczba miejsc
     // komfort (HIGH, MEDIUM, LOW)
-    private static void addroom(String input) {
-        String[] params = input.split("\\s+");
-        if(params.length == 4){
+    private static void addroom(List<String> input) {
+        if(input.size() == 4){
             try {
-                int beds = Integer.parseInt(params[2]);
-                Comfort comfort = Comfort.valueOf(params[3].toUpperCase());
-                HotelImpl.getInstance().addRoom(params[1], beds, comfort);
+                int beds = Integer.parseInt(input.get(2));
+                Comfort comfort = Comfort.valueOf(input.get(3).toUpperCase());
+                HotelImpl.getInstance().addRoom(input.get(1), beds, comfort);
                 System.out.println("Room created");
             } catch(KeyAlreadyExistsException e) {
                 System.out.println("Room already exists");
@@ -202,17 +218,13 @@ public class Main {
 
     // usuń pokój
     // parametr: nazwa
-    private static void deleteroom(String input) {
-        String name = input.split("\\s+")[1];
+    private static void deleteroom(List<String> input) {
+        String name = input.get(1);
         try {
             HotelImpl.getInstance().deleteRoom(name);
         } catch (InvalidKeyException e) {
             System.out.println("Room doesn't exist");
         }
-    }
-
-    private static Comfort parseComfort(String s){
-        return Comfort.valueOf(s);
     }
 
     private static void listclients() {
@@ -229,8 +241,8 @@ public class Main {
     // dane klienta:
     // dotychczasowe rezerwacje
     // czy stały klient (true/false) - stały klient ustawiany automatycznie po 5 rezerwacjach
-    private static void showclient(String input) {
-        String name = input.split("\\s+")[1];
+    private static void showclient(List<String> input) {
+        String name = input.get(1);
         Client client = HotelImpl.getInstance().getClient(name);
         if(client != null){
             printClient(name, client);
@@ -273,9 +285,9 @@ public class Main {
 
     // dodanie klienta
     // parametr: nazwa (String)
-    private static void addclient(String input) {
+    private static void addclient(List<String> input) {
         System.out.println(input);
-        String name = input.split("\\s+")[1];
+        String name = input.get(1);
         if(HotelImpl.getInstance().getClient(name) == null){
             HotelImpl.getInstance().addClient(name);
             System.out.println("Client added");
@@ -286,8 +298,8 @@ public class Main {
 
     // usuwanie klienta
     // parametr: nazwa (String)
-    private static void deleteclient(String input) {
-        String name = input.split("\\s+")[1];
+    private static void deleteclient(List<String> input) {
+        String name = input.get(1);
         if(HotelImpl.getInstance().getClient(name) == null){
             System.out.println("Client does not exist");
         } else {
