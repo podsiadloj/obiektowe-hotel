@@ -40,56 +40,44 @@ public class Persistence
 		return lines;
 	}
 
-	static boolean saveToCsv(String fileName, Map<String, Object> dataMap)
+	private static void saveToCsv(String filename, List<List<String>> data) throws IOException
 	{
-		try
-		{
-			FileWriter fileWriter  = new FileWriter(fileName);
-			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+		FileWriter fileWriter  = new FileWriter(filename);
+		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-			for (Map.Entry<String, Object> entry : dataMap.entrySet())
-			{
-				String line = entry.getKey() + ";" + entry.getValue();
-
-				System.out.println(line);
-
-				bufferedWriter.write(line);
-				bufferedWriter.newLine();
-			}
-
-			bufferedWriter.close();
-		}
-		catch (IOException ioe)
-		{
-			ioe.printStackTrace();
-
-			return false;
-		}
-
-		return true;
-	}
-
-	static void TestRead()
-	{
-		Map<String, Object> dataMap = new HashMap<String, Object>();
-
-		ReadFromCsv("HotelClients.csv", "Clients", dataMap);
-
-		for (Map.Entry<String, Object> entry : dataMap.entrySet())
-		{
-			String line = entry.getKey() + ";" + entry.getValue();
+		for (List<String> record : data) {
+			String line = String.join(";", record);
 
 			System.out.println(line);
+
+			bufferedWriter.write(line);
+			bufferedWriter.newLine();
 		}
+
+		bufferedWriter.close();
 	}
 
-	static void TestSave()
-	{
-		Map<String, Object> dataMap = new HashMap<String, Object>();
-
-		dataMap.put(UUID.randomUUID().toString(), new Client(Client.Sex.Female, "Klaudia", "Glabala", "kg@portal.com", "601602603"));
-		dataMap.put(UUID.randomUUID().toString(), new Client(Client.Sex.Male, "Jan", "Podsiadlo", "jp@portal.com", "701702703"));
-
-		SaveToCsv("HotelClients.csv", dataMap);
-	}
+//	static void TestRead()
+//	{
+//		Map<String, Object> dataMap = new HashMap<String, Object>();
+//
+//		ReadFromCsv("HotelClients.csv", "Clients", dataMap);
+//
+//		for (Map.Entry<String, Object> entry : dataMap.entrySet())
+//		{
+//			String line = entry.getKey() + ";" + entry.getValue();
+//
+//			System.out.println(line);
+//		}
+//	}
+//
+//	static void TestSave()
+//	{
+//		Map<String, Object> dataMap = new HashMap<String, Object>();
+//
+//		dataMap.put(UUID.randomUUID().toString(), new Client(Client.Sex.Female, "Klaudia", "Glabala", "kg@portal.com", "601602603"));
+//		dataMap.put(UUID.randomUUID().toString(), new Client(Client.Sex.Male, "Jan", "Podsiadlo", "jp@portal.com", "701702703"));
+//
+//		SaveToCsv("HotelClients.csv", dataMap);
+//	}
 }
