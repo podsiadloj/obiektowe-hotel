@@ -7,9 +7,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
+    public static DateFormat dateformat = new SimpleDateFormat("dd.mm.yyyy");
+
     public static Date parseDate(String ds) throws ParseException {
-        DateFormat df = new SimpleDateFormat("dd.mm.yyyy");
-        return df.parse(ds);
+        return dateformat.parse(ds);
     }
 
     public static void main(String[] args) {
@@ -159,11 +160,7 @@ public class Main {
                 Client client = hotel.getClient(input.get(3));
                 if(client != null) {
                     Period period = new Period(parseDate(input.get(1)), parseDate(input.get(2)));
-                    List<RoomInfo> rooms = input
-                            .subList(4, input.size())
-                            .stream()
-                            .map(hotel::getRoom)
-                            .collect(Collectors.toList());
+                    List<String> rooms = input.subList(4, input.size());
                     ReservationInfo reservation = new ReservationInfoImpl(period, rooms);
                     int price = hotel.makeReservation(client, reservation);
                     System.out.println("Reservation created, price " + (double)price/100 + " PLN");

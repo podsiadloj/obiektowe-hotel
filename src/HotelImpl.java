@@ -1,5 +1,8 @@
 import javax.management.openmbean.InvalidKeyException;
 import javax.management.openmbean.KeyAlreadyExistsException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 public class HotelImpl implements Hotel {
@@ -9,21 +12,22 @@ public class HotelImpl implements Hotel {
     private Map<Integer, Event> seasons;
     private Map<Integer, Event> events;
 
-    private void saveClients(){
-        //TODO: save clients to csv
-    };
-    private void saveRooms(){
-        //TODO: save rooms to csv
-    };
-    private void saveReservations(){
-        //TODO: save reservations to csv
-    };
+    private void save(){
+        try {
+            Persistence.saveRooms(rooms);
+            Persistence.saveReservations(reservations);
+            Persistence.saveClients(clientsMap);
+        } catch (IOException e) {
+            System.out.println("Save failed!");
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void addClient(String name) {
         if(!clientsMap.containsKey(name)){
             clientsMap.put(name, new Client());
-            saveClients();
+            save();
         }
     }
 
@@ -31,7 +35,7 @@ public class HotelImpl implements Hotel {
     public void deleteClient(String name) {
         if(!clientsMap.containsKey(name)){
             clientsMap.remove(name);
-            saveClients();
+            save();
         }
     }
 
@@ -49,7 +53,7 @@ public class HotelImpl implements Hotel {
     public void addRoom(String name, int nOfBeds, Comfort comfort) throws KeyAlreadyExistsException {
         if(!rooms.containsKey(name)){
             rooms.put(name, new RoomInfo(name, nOfBeds, comfort));
-            saveRooms();
+            save();
         } else throw new KeyAlreadyExistsException();
     }
 
@@ -63,7 +67,7 @@ public class HotelImpl implements Hotel {
     public void deleteRoom(String name) throws InvalidKeyException {
         if(!rooms.containsKey(name)){
             rooms.remove(name);
-            saveRooms();
+            save();
         } else throw new InvalidKeyException();
     }
 
@@ -139,8 +143,8 @@ public class HotelImpl implements Hotel {
         if(client.reservationIds.size() >= 5){
             client.discount = true;
         }
-        saveReservations();
-        saveClients();
+        System.out.println(request.getPeriod().getDays());
+        save();
         return request.getPrice();
     }
 
@@ -182,8 +186,7 @@ public class HotelImpl implements Hotel {
             for (Client client: clientsMap.values()) {
                 client.reservationIds.removeIf(i -> i == id);
             }
-            saveReservations();
-            saveClients();
+            save();
         }
     }
 
@@ -218,16 +221,30 @@ public class HotelImpl implements Hotel {
     }
 
     private HotelImpl(){
-        clientsMap = new HashMap<>(); //TODO: load from csv
-        rooms = new HashMap<>(); //TODO: load from csv
-        reservations = new HashMap<>(); //TODO: load from csv
+        try {
+            try {
+                clientsMap = Persistence.loadClients();
+            } catch (NoSuchFileException | FileNotFoundException e) {
+                clientsMap = new HashMap<>();
+            }
+            try {
+                rooms = Persistence.loadRooms();
+            } catch (NoSuchFileException | FileNotFoundException e) {
+                rooms = new HashMap<>();
+            }
+            try {
+                reservations = Persistence.loadReservations();
+            } catch (NoSuchFileException | FileNotFoundException e) {
+                reservations = new HashMap<>();
+            }
+        } catch (IOException e) {
+            System.out.println("Failed to load saved data:");
+            System.out.println("Exiting.");
+            e.printStackTrace();
+            System.exit(1);
+        }
         seasons = new HashMap<>(); //TODO: load from csv
         events = new HashMap<>(); //TODO: load from csv
-        // musi załadować dane z CSV:
-        // - pokoje
-        // - klienci
-        // - rezerwacje
-        // te dane muszą być zapisywane w każdej funkcji modyfikującej stan
     }
 
     public static Hotel instance = new HotelImpl();

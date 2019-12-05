@@ -1,5 +1,6 @@
 import javax.management.openmbean.InvalidKeyException;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,8 +16,8 @@ public class Persistence
 			} else {
 				String name = line.get(0);
 				result.put(name, new Client(
-						Boolean.parseBoolean(line.get(2)),
-						line.subList(1, line.size()).stream().map(Integer::parseInt).collect(Collectors.toList())
+						Boolean.parseBoolean(line.get(1)),
+						line.subList(2, line.size()).stream().map(Integer::parseInt).collect(Collectors.toList())
 				));
 			}
 		}
@@ -49,16 +50,20 @@ public class Persistence
 		Hotel hotel = HotelImpl.getInstance();
 		for (List<String> line : lines) {
 			try {
-				if (line.size() < 4) {
+				if (line.size() < 5) {
 					throw new IOException("loadReservations: invalid CSV");
 				} else {
 					Integer id = Integer.parseInt(line.get(0));
 					Date start = Main.parseDate(line.get(1));
 					Date end = Main.parseDate(line.get(2));
-					result.put(id, new ReservationInfoImpl(
-							new Period(start, end),
-							line.subList(3, line.size()).stream().map(hotel::getRoom).collect(Collectors.toList())
-					));
+					Period period = new Period(start, end);
+					List<String> rooms = line.subList(4, line.size());
+					ReservationInfo reservation = new ReservationInfoImpl(
+							period,
+							rooms
+					);
+					reservation.setPrice(Integer.parseInt(line.get(3)));
+					result.put(id, reservation);
 				}
 			}
 			catch (InvalidKeyException e) {
@@ -89,44 +94,58 @@ public class Persistence
 		return lines;
 	}
 
+	public static void saveRooms(Map<String, RoomInfo> rooms) throws IOException {
+		List<List<String>> output = new ArrayList<>();
+		for (RoomInfo room : rooms.values()) {
+			List<String> line = new ArrayList<>();
+			line.add(room.name);
+			line.add(room.number.toString());
+			line.add(room.comfort.toString());
+			output.add(line);
+		}
+		saveToCsv("HotelRooms.csv", output);
+	}
+
+	public static void saveReservations(Map<Integer, ReservationInfo> reservations) throws IOException {
+		List<List<String>> output = new ArrayList<>();
+		for (Integer reservationId : reservations.keySet()) {
+			ReservationInfo reservation = reservations.get(reservationId);
+			List<String> line = new ArrayList<>();
+			line.add(reservationId.toString());
+			line.add(Main.dateformat.format(reservation.getPeriod().getStart()));
+			line.add(Main.dateformat.format(reservation.getPeriod().getEnd()));
+			line.add(reservation.getPrice().toString());
+			line.addAll(reservation.getRoomsInfo().stream().map(roomInfo -> roomInfo.name).collect(Collectors.toList()));
+			output.add(line);
+		}
+		saveToCsv("HotelReservations.csv", output);
+	}
+
+	public static void saveClients(Map<String, Client> clients) throws IOException {
+		List<List<String>> output = new ArrayList<>();
+		for (String clientName : clients.keySet()) {
+			Client client = clients.get(clientName);
+			List<String> line = new ArrayList<>();
+			line.add(clientName);
+			line.add(Boolean.toString(client.discount));
+			line.addAll(client.reservationIds.stream().map(Object::toString).collect(Collectors.toList()));
+			output.add(line);
+		}
+		saveToCsv("HotelClients.csv", output);
+	}
+
 	private static void saveToCsv(String filename, List<List<String>> data) throws IOException
 	{
-		FileWriter fileWriter  = new FileWriter(filename);
-		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+		PrintWriter writer  = new PrintWriter(filename, StandardCharsets.UTF_8);
 
 		for (List<String> record : data) {
 			String line = String.join(";", record);
 
 			System.out.println(line);
 
-			bufferedWriter.write(line);
-			bufferedWriter.newLine();
+			writer.println(line);
 		}
 
-		bufferedWriter.close();
+		writer.close();
 	}
-
-//	static void TestRead()
-//	{
-//		Map<String, Object> dataMap = new HashMap<String, Object>();
-//
-//		ReadFromCsv("HotelClients.csv", "Clients", dataMap);
-//
-//		for (Map.Entry<String, Object> entry : dataMap.entrySet())
-//		{
-//			String line = entry.getKey() + ";" + entry.getValue();
-//
-//			System.out.println(line);
-//		}
-//	}
-//
-//	static void TestSave()
-//	{
-//		Map<String, Object> dataMap = new HashMap<String, Object>();
-//
-//		dataMap.put(UUID.randomUUID().toString(), new Client(Client.Sex.Female, "Klaudia", "Glabala", "kg@portal.com", "601602603"));
-//		dataMap.put(UUID.randomUUID().toString(), new Client(Client.Sex.Male, "Jan", "Podsiadlo", "jp@portal.com", "701702703"));
-//
-//		SaveToCsv("HotelClients.csv", dataMap);
-//	}
 }

@@ -1,13 +1,14 @@
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReservationInfoImpl implements ReservationInfo {
     private Period period;
-    private List<RoomInfo> rooms;
+    private List<String> roomNames;
     private int price = 0;
 
-    public ReservationInfoImpl(Period period, List<RoomInfo> rooms) {
+    public ReservationInfoImpl(Period period, List<String> rooms) {
         this.period = period;
-        this.rooms = rooms;
+        this.roomNames = rooms;
     }
 
     @Override
@@ -17,7 +18,8 @@ public class ReservationInfoImpl implements ReservationInfo {
 
     @Override
     public List<RoomInfo> getRoomsInfo() {
-        return rooms;
+        Hotel hotel = HotelImpl.getInstance();
+        return roomNames.stream().map(hotel::getRoom).collect(Collectors.toList());
     }
 
     @Override
