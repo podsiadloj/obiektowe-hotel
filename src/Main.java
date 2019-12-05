@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
-    private static Date parseDate(String ds) throws ParseException {
+    public static Date parseDate(String ds) throws ParseException {
         DateFormat df = new SimpleDateFormat("dd.mm.yyyy");
         return df.parse(ds);
     }
