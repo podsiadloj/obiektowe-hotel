@@ -6,6 +6,8 @@ public class HotelImpl implements Hotel {
     private Map<String, Client> clientsMap;
     private Map<String, RoomInfo> rooms;
     private Map<Integer, ReservationInfo> reservations;
+    private Map<Integer, Event> seasons;
+    private Map<Integer, Event> events;
 
     private void saveClients(){
         //TODO: save clients to csv
@@ -185,10 +187,42 @@ public class HotelImpl implements Hotel {
         }
     }
 
+    @Override
+    public int setSeason(int modifier, Period period) {
+        return 0;
+    }
+
+    @Override
+    public void removeSeason(int id) {
+
+    }
+
+    @Override
+    public Map<Integer, Event> listSeasons() {
+        return null;
+    }
+
+    @Override
+    public int setEvent(int modifier, Period period) {
+        return 0;
+    }
+
+    @Override
+    public void removeEvent(int id) {
+
+    }
+
+    @Override
+    public Map<Integer, Event> listEvents() {
+        return null;
+    }
+
     private HotelImpl(){
         clientsMap = new HashMap<>(); //TODO: load from csv
         rooms = new HashMap<>(); //TODO: load from csv
         reservations = new HashMap<>(); //TODO: load from csv
+        seasons = new HashMap<>(); //TODO: load from csv
+        events = new HashMap<>(); //TODO: load from csv
         // musi załadować dane z CSV:
         // - pokoje
         // - klienci

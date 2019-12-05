@@ -24,6 +24,18 @@ public interface Hotel {
     ReservationInfo getReservation(int id);
     void deleteReservation(int id);
 
+    //seasons can't overlap with other seasons
+
+    int setSeason(int modifier, Period period);
+    void removeSeason(int id);
+    Map<Integer, Event> listSeasons();
+
+    // events can't overlap with other events, but can with seasons
+
+    int setEvent(int modifier, Period period);
+    void removeEvent(int id);
+    Map<Integer, Event> listEvents();
+
     class InvalidRequestException extends Exception {}
 
 }
