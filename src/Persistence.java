@@ -47,7 +47,6 @@ public class Persistence
 	public static Map<Integer, ReservationInfo> loadReservations() throws IOException {
 		Map<Integer, ReservationInfo> result = new HashMap<>();
 		List<List<String>> lines = loadCsv("HotelReservations.csv");
-		Hotel hotel = HotelImpl.getInstance();
 		for (List<String> line : lines) {
 			try {
 				if (line.size() < 5) {
@@ -70,6 +69,36 @@ public class Persistence
 				throw new IOException("loadReservations: reservations contain nonexistent rooms");
 			} catch (NumberFormatException | ParseException e) {
 				throw new IOException("loadReservations: invalid CSV");
+			}
+		}
+		return result;
+	}
+
+	public static Map<Integer, Event> loadSeasons() throws IOException {
+		return loadPeriodPricing("HotelSeasons.csv");
+	}
+
+	public static Map<Integer, Event> loadEvents() throws IOException {
+		return loadPeriodPricing("HotelEvents.csv");
+	}
+
+	private static Map<Integer, Event> loadPeriodPricing(String filename) throws IOException {
+		Map<Integer, Event> result = new HashMap<>();
+		List<List<String>> lines = loadCsv(filename);
+		for (List<String> line: lines){
+			try {
+				if (line.size() < 4) {
+					throw new IOException("loadPeriodPricing: invalid CSV");
+				} else {
+					Integer id = Integer.parseInt(line.get(0));
+					Date start = Main.parseDate(line.get(1));
+					Date end = Main.parseDate(line.get(2));
+					Period period = new Period(start, end);
+					double modifier = Double.parseDouble(line.get(3));
+					result.put(id, new Event(period, modifier));
+				}
+			} catch (NumberFormatException | ParseException e) {
+				throw new IOException("loadPeriodPricing: invalid CSV");
 			}
 		}
 		return result;
@@ -132,6 +161,28 @@ public class Persistence
 			output.add(line);
 		}
 		saveToCsv("HotelClients.csv", output);
+	}
+
+	public static void saveSeasons(Map<Integer, Event> seasons) throws IOException {
+		savePeriodPricing("HotelSeasons.csv", seasons);
+	}
+
+	public static void saveEvents(Map<Integer, Event> events) throws IOException {
+		savePeriodPricing("HotelEvents.csv", events);
+	}
+
+	private static void savePeriodPricing(String filename, Map<Integer, Event> data) throws IOException {
+		List<List<String>> output = new ArrayList<>();
+		for (Integer id : data.keySet()) {
+			Event event = data.get(id);
+			List<String> line = new ArrayList<>();
+			line.add(id.toString());
+			line.add(Main.dateformat.format(event.period.getStart()));
+			line.add(Main.dateformat.format(event.period.getEnd()));
+			line.add(Double.toString(event.priceModifier));
+			output.add(line);
+		}
+		saveToCsv(filename, output);
 	}
 
 	private static void saveToCsv(String filename, List<List<String>> data) throws IOException

@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HotelImpl implements Hotel {
     private Map<String, Client> clientsMap;
@@ -17,6 +18,8 @@ public class HotelImpl implements Hotel {
             Persistence.saveRooms(rooms);
             Persistence.saveReservations(reservations);
             Persistence.saveClients(clientsMap);
+            Persistence.saveSeasons(seasons);
+            Persistence.saveEvents(events);
         } catch (IOException e) {
             System.out.println("Save failed!");
             e.printStackTrace();
@@ -137,7 +140,7 @@ public class HotelImpl implements Hotel {
             }
         }
         request.setPrice(calcReservationCost(request, client));
-        int id = newReservationId();
+        int id = newMapId(reservations.keySet());
         reservations.put(id, request);
         client.reservationIds.add(id);
         if(client.reservationIds.size() >= 5){
@@ -148,10 +151,10 @@ public class HotelImpl implements Hotel {
         return request.getPrice();
     }
 
-    private int newReservationId(){
+    private int newMapId(Set<Integer> keys){
         int i = 0;
         while(true){
-            if(!reservations.containsKey(i)){
+            if(!keys.contains(i)){
                 return i;
             } else {
                 i++;
@@ -160,13 +163,39 @@ public class HotelImpl implements Hotel {
     }
 
     private int calcReservationCost(ReservationInfo reservation, Client client) {
-        int base = reservation.getRoomsInfo().stream().mapToInt(RoomInfo::getDailyCost).sum();
-        int forPeriod = base * reservation.getPeriod().getDays();
+        int base = reservation
+                .getRoomsInfo()
+                .stream()
+                .mapToInt(RoomInfo::getDailyCost)
+                .sum();
+        double forPeriod = base * reservation
+                .getPeriod()
+                .daysList()
+                .stream()
+                .mapToDouble(this::calcDayModifier)
+                .sum();
         if(client.discount){
             return (int) Math.ceil(forPeriod * 0.8);
         } else {
-            return forPeriod;
+            return (int) Math.ceil(forPeriod);
         }
+    }
+
+    private double calcDayModifier(Date date){
+        double modifier = 1;
+        for (Event event: events.values()) {
+            if(event.period.getStart().getTime() <= date.getTime() && event.period.getEnd().getTime() >= date.getTime()){
+                modifier = modifier * event.priceModifier;
+                break;
+            }
+        }
+        for (Event season: seasons.values()) {
+            if(season.period.getStart().getTime() <= date.getTime() && season.period.getEnd().getTime() >= date.getTime()){
+                modifier = modifier * season.priceModifier;
+                break;
+            }
+        }
+        return modifier;
     }
 
     @Override
@@ -190,34 +219,55 @@ public class HotelImpl implements Hotel {
         }
     }
 
+    private int setPeriodPricing(int modifier, Period period, Map<Integer, Event> category) throws InvalidRequestException {
+        List<Event> overlapping = category.values().stream().filter(event -> calcOverlap(period, event.period) != null).collect(Collectors.toList());
+        if(overlapping.size() > 0){
+            throw new InvalidRequestException();
+        } else {
+            int id = newMapId(category.keySet());
+            category.put(id, new Event(period, modifier));
+            save();
+            return id;
+        }
+    }
+
+    private void removePeriodPricing(int id, Map<Integer, Event> category) {
+        category.remove(id);
+        save();
+    }
+
+    private Map<Integer, Event> listPeriodPricing(Map<Integer, Event> category) {
+        return category;
+    }
+
     @Override
-    public int setSeason(int modifier, Period period) {
-        return 0;
+    public int setSeason(int modifier, Period period) throws InvalidRequestException {
+        return setPeriodPricing(modifier, period, seasons);
     }
 
     @Override
     public void removeSeason(int id) {
-
+        removePeriodPricing(id, seasons);
     }
 
     @Override
     public Map<Integer, Event> listSeasons() {
-        return null;
+        return listPeriodPricing(seasons);
     }
 
     @Override
-    public int setEvent(int modifier, Period period) {
-        return 0;
+    public int setEvent(int modifier, Period period) throws InvalidRequestException {
+        return setPeriodPricing(modifier, period, events);
     }
 
     @Override
     public void removeEvent(int id) {
-
+        removePeriodPricing(id, seasons);
     }
 
     @Override
     public Map<Integer, Event> listEvents() {
-        return null;
+        return listPeriodPricing(seasons);
     }
 
     private HotelImpl(){
@@ -237,14 +287,22 @@ public class HotelImpl implements Hotel {
             } catch (NoSuchFileException | FileNotFoundException e) {
                 reservations = new HashMap<>();
             }
+            try {
+                seasons = Persistence.loadSeasons();
+            } catch (NoSuchFileException | FileNotFoundException e) {
+                seasons = new HashMap<>();
+            }
+            try {
+                events = Persistence.loadEvents();
+            } catch (NoSuchFileException | FileNotFoundException e) {
+                events = new HashMap<>();
+            }
         } catch (IOException e) {
             System.out.println("Failed to load saved data:");
             System.out.println("Exiting.");
             e.printStackTrace();
             System.exit(1);
         }
-        seasons = new HashMap<>(); //TODO: load from csv
-        events = new HashMap<>(); //TODO: load from csv
     }
 
     public static Hotel instance = new HotelImpl();
