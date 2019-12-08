@@ -246,7 +246,8 @@ public class Main {
                     Period period = new Period(parseDate(input.get(1)), parseDate(input.get(2)));
                     List<String> rooms = input.subList(4, input.size());
                     ReservationInfo reservation = new ReservationInfoImpl(period, rooms);
-                    int price = hotel.makeReservation(client, reservation);
+                    int id = hotel.makeReservation(client, reservation);
+                    int price = hotel.getReservation(id).getPrice();
                     System.out.println("Reservation created, price " + (double)price/100 + " PLN");
                 }
             } catch (InvalidKeyException e) {

@@ -148,7 +148,7 @@ public class HotelImpl implements Hotel {
         }
         System.out.println(request.getPeriod().getDays());
         save();
-        return request.getPrice();
+        return id;
     }
 
     private int newMapId(Set<Integer> keys){
