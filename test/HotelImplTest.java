@@ -19,6 +19,11 @@ class HotelImplTest
 	{
 		Hotel hotel = HotelImpl.getInstance();
 
+		for (Map.Entry<Integer, ReservationInfo> reservation : hotel.listReservations())
+		{
+			hotel.deleteReservation(reservation.getKey());
+		}
+
 		try
 		{
 			hotel.deleteClient("Client");
