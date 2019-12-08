@@ -36,7 +36,7 @@ public class HotelImpl implements Hotel {
 
     @Override
     public void deleteClient(String name) {
-        if(!clientsMap.containsKey(name)){
+        if(clientsMap.containsKey(name)){
             clientsMap.remove(name);
             save();
         }
@@ -68,7 +68,7 @@ public class HotelImpl implements Hotel {
 
     @Override
     public void deleteRoom(String name) throws InvalidKeyException {
-        if(!rooms.containsKey(name)){
+        if(rooms.containsKey(name)){
             rooms.remove(name);
             save();
         } else throw new InvalidKeyException();
