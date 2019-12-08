@@ -8,7 +8,7 @@ public class Period {
     private Date start;
     private Date end;
 
-    public Period(Date start, Date end) {
+    public Period(Date start, Date end) throws IllegalArgumentException {
         this.start = start;
         this.end = end;
         if(getDays() < 1){

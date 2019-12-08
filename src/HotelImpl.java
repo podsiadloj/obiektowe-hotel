@@ -219,7 +219,7 @@ public class HotelImpl implements Hotel {
         }
     }
 
-    private int setPeriodPricing(int modifier, Period period, Map<Integer, Event> category) throws InvalidRequestException {
+    private int setPeriodPricing(double modifier, Period period, Map<Integer, Event> category) throws InvalidRequestException {
         List<Event> overlapping = category.values().stream().filter(event -> calcOverlap(period, event.period) != null).collect(Collectors.toList());
         if(overlapping.size() > 0){
             throw new InvalidRequestException();
@@ -241,7 +241,7 @@ public class HotelImpl implements Hotel {
     }
 
     @Override
-    public int setSeason(int modifier, Period period) throws InvalidRequestException {
+    public int setSeason(double modifier, Period period) throws InvalidRequestException {
         return setPeriodPricing(modifier, period, seasons);
     }
 
@@ -256,7 +256,7 @@ public class HotelImpl implements Hotel {
     }
 
     @Override
-    public int setEvent(int modifier, Period period) throws InvalidRequestException {
+    public int setEvent(double modifier, Period period) throws InvalidRequestException {
         return setPeriodPricing(modifier, period, events);
     }
 

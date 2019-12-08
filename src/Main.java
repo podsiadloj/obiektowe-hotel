@@ -60,9 +60,25 @@ public class Main {
                         break;
                     case "deletereservation":
                         deletereservation(input);
-                        // parametr: id (Integer)
                         break;
-                    // mniejszy priorytet - dopisać jak będzie czas: ustawianie okresów, w których cena jest wyższa/niższa
+                    case "listseasons":
+                        listseasons();
+                        break;
+                    case "addseason":
+                        addseason(input);
+                        break;
+                    case "deleteseason":
+                        deleteseason(input);
+                        break;
+                    case "listevents":
+                        listevents();
+                        break;
+                    case "addevent":
+                        addevent(input);
+                        break;
+                    case "deleteevent":
+                        deleteevent(input);
+                        break;
                     case "quit":
                         end = true;
                         break;
@@ -72,6 +88,68 @@ public class Main {
             } catch (ParseException | IllegalArgumentException e) {
                 syntaxError();
             }
+        }
+    }
+
+    private static void listseasons(){
+        printEvents(HotelImpl.getInstance().listSeasons());
+    }
+
+    private static void deleteseason(List<String> input) {
+        int id = Integer.parseInt(input.get(1));
+        if (HotelImpl.getInstance().listSeasons().containsKey(id)) {
+            HotelImpl.getInstance().removeEvent(id);
+        } else {
+            System.out.println("No such season");
+        }
+    }
+
+    private static void addseason(List<String> input) throws ParseException {
+        Event e = parseEvent(input);
+        try {
+            HotelImpl.getInstance().setSeason(e.priceModifier, e.period);
+        } catch (Hotel.InvalidRequestException ex) {
+            System.out.println("Overlap with an existing season!");
+        }
+    }
+
+    private static void listevents(){
+        printEvents(HotelImpl.getInstance().listEvents());
+    }
+
+    private static void deleteevent(List<String> input) {
+        int id = Integer.parseInt(input.get(1));
+        if (HotelImpl.getInstance().listEvents().containsKey(id)) {
+            HotelImpl.getInstance().removeEvent(id);
+        } else {
+            System.out.println("No such event");
+        }
+    }
+
+    private static void addevent(List<String> input) throws ParseException {
+        Event e = parseEvent(input);
+        try {
+            HotelImpl.getInstance().setEvent(e.priceModifier, e.period);
+        } catch (Hotel.InvalidRequestException ex) {
+            System.out.println("Overlap with an existing event!");
+        }
+    }
+
+    private static Event parseEvent(List<String> input) throws ParseException {
+        if(input.size() != 4){
+            throw new IllegalArgumentException();
+        } else {
+            Date start = parseDate(input.get(1));
+            Date end = parseDate(input.get(2));
+            double modifier = Double.parseDouble(input.get(3));
+            return new Event(new Period(start, end), modifier);
+        }
+    }
+
+    private static void printEvents(Map<Integer, Event> events){
+        for(int key: events.keySet()){
+            Event event = events.get(key);
+            System.out.println(key + ": " + event.period.getStart().toString() + " - " + event.period.getEnd().toString() + ": modifier " + event.priceModifier);
         }
     }
 
@@ -108,6 +186,12 @@ public class Main {
         System.out.println("listreservations - list all reservations");
         System.out.println("showreservation [id: integer] - show detailed info about reservation");
         System.out.println("deletereservation [id: integer] - delete reservation");
+        System.out.println("addseason [start: dd.mm.yyyy] [end: dd.mm.yyyy] [priceModifier: floating point number e.g. '1.5'] - create a seasonal pricing period. Seasons can't overlap.");
+        System.out.println("listseasons - list all seasonal pricing periods");
+        System.out.println("deleteseason [id: integer] delete seasonal pricing period");
+        System.out.println("addevent [start: dd.mm.yyyy] [end: dd.mm.yyyy] [priceModifier: floating point number e.g. '1.5'] - create a event pricing period. Events can't overlap.");
+        System.out.println("listevents - list all event pricing periods");
+        System.out.println("deleteevent [id: integer] delete event pricing period");
     }
 
     private static void showreservation(List<String> input) {
