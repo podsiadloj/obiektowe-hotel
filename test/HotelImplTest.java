@@ -1,7 +1,4 @@
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 
 import javax.management.openmbean.InvalidKeyException;
 
@@ -17,13 +14,49 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class HotelImplTest
 {
+	@BeforeAll
+	static void Clean()
+	{
+		Hotel hotel = HotelImpl.getInstance();
+
+		try
+		{
+			hotel.deleteClient("Client");
+		}
+		catch(Exception e)
+		{
+		}
+
+		try
+		{
+			hotel.deleteRoom("Room1");
+		}
+		catch(Exception e)
+		{
+		}
+
+		try
+		{
+			hotel.deleteRoom("Room2");
+		}
+		catch(Exception e)
+		{
+		}
+
+		try
+		{
+			hotel.deleteRoom("Room3");
+		}
+		catch(Exception e)
+		{
+		}
+	}
+
 	@Order(1)
 	@Test
 	void addClient()
 	{
 		Hotel hotel = HotelImpl.getInstance();
-
-		assertEquals(hotel.clients().size(), 0);
 
 		hotel.addClient("Client");
 
@@ -128,7 +161,7 @@ class HotelImplTest
 
 		LocalDate date = LocalDate.now();
 		Period period = new Period(Date.valueOf(date.plusDays(10)), Date.valueOf(date.plusDays(20)));
-		List<String> rooms = new ArrayList<>(Arrays.asList(room1.name));
+		List<String> rooms = new ArrayList<String>(Arrays.asList("Room1"));
 		final ReservationInfo reservation1 = new ReservationInfoImpl(period, rooms);
 
 		assertEquals(hotel.listReservations().size(), 0);
@@ -164,7 +197,7 @@ class HotelImplTest
 
 		LocalDate date = LocalDate.now();
 		Period period = new Period(Date.valueOf(date.plusDays(15)), Date.valueOf(date.plusDays(25)));
-		List<String> rooms = new ArrayList<>(Arrays.asList(room2.name));
+		List<String> rooms = new ArrayList<String>(Arrays.asList("Room2"));
 		ReservationInfo reservation = new ReservationInfoImpl(period, rooms);
 
 		final int id = hotel.makeReservation(client, reservation);
@@ -188,7 +221,7 @@ class HotelImplTest
 
 		LocalDate date = LocalDate.now();
 		Period period = new Period(Date.valueOf(date.plusDays(30)), Date.valueOf(date.plusDays(40)));
-		List<String> rooms = new ArrayList<>(Arrays.asList(room1.name, room2.name, room3.name));
+		List<String> rooms = new ArrayList<String>(Arrays.asList("Room1", "Room2", "Room3"));
 		ReservationInfo reservation = new ReservationInfoImpl(period, rooms);
 
 		assertEquals(hotel.listReservations().size(), 2);
