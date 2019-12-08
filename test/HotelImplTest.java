@@ -128,7 +128,7 @@ class HotelImplTest
 
 		LocalDate date = LocalDate.now();
 		Period period = new Period(Date.valueOf(date.plusDays(10)), Date.valueOf(date.plusDays(20)));
-		List<RoomInfo> rooms = new ArrayList<RoomInfo>(Arrays.asList(room1));
+		List<String> rooms = new ArrayList<>(Arrays.asList(room1.name));
 		final ReservationInfo reservation1 = new ReservationInfoImpl(period, rooms);
 
 		assertEquals(hotel.listReservations().size(), 0);
@@ -164,7 +164,7 @@ class HotelImplTest
 
 		LocalDate date = LocalDate.now();
 		Period period = new Period(Date.valueOf(date.plusDays(15)), Date.valueOf(date.plusDays(25)));
-		List<RoomInfo> rooms = new ArrayList<RoomInfo>(Arrays.asList(room2));
+		List<String> rooms = new ArrayList<>(Arrays.asList(room2.name));
 		ReservationInfo reservation = new ReservationInfoImpl(period, rooms);
 
 		final int id = hotel.makeReservation(client, reservation);
@@ -188,7 +188,7 @@ class HotelImplTest
 
 		LocalDate date = LocalDate.now();
 		Period period = new Period(Date.valueOf(date.plusDays(30)), Date.valueOf(date.plusDays(40)));
-		List<RoomInfo> rooms = new ArrayList<RoomInfo>(Arrays.asList(room1, room2, room3));
+		List<String> rooms = new ArrayList<>(Arrays.asList(room1.name, room2.name, room3.name));
 		ReservationInfo reservation = new ReservationInfoImpl(period, rooms);
 
 		assertEquals(hotel.listReservations().size(), 2);
