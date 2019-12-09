@@ -184,13 +184,13 @@ public class HotelImpl implements Hotel {
     private double calcDayModifier(Date date){
         double modifier = 1;
         for (Event event: events.values()) {
-            if(event.period.getStart().getTime() <= date.getTime() && event.period.getEnd().getTime() >= date.getTime()){
+            if(event.period.isDayInPeriod(date)){
                 modifier = modifier * event.priceModifier;
                 break;
             }
         }
         for (Event season: seasons.values()) {
-            if(season.period.getStart().getTime() <= date.getTime() && season.period.getEnd().getTime() >= date.getTime()){
+            if(season.period.isDayInPeriod(date)){
                 modifier = modifier * season.priceModifier;
                 break;
             }
